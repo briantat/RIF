@@ -12,6 +12,9 @@ library(datasets)
 data1 <- read.csv("data/final_data.csv")
 all_data1 <- data1
 
+# set working directory
+# shinyapps::deployApp(getwd())
+
 shinyServer(function(input, output, session) {
   dat <- reactive({
     d <- all_data1
