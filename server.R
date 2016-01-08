@@ -14,7 +14,8 @@ library(rMaps)
 data1 <- read.csv("data/final_data.csv")
 all_data1 <- data1
 
-#shinyapps::deployApp(getwd())
+#library(rsconnect)
+#deployApp()
 
 shinyServer(function(input, output, session) {
   dat <- reactive({

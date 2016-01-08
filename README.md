@@ -1,5 +1,5 @@
 # RIF
 Reading Is Fundamental Project
 
-Visit https://briantat.shinyapps.io/brian/ for a demonstration.
-Site last updated: March 8, 2015
+Visit https://briantat.shinyapps.io/reading_is_fundamental/ for a demonstration.
+Site last updated: January 7, 2016
