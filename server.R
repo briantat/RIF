@@ -8,12 +8,13 @@ library(ggvis)
 library(ggplot2)
 library(foreign)
 library(datasets)
+library(rMaps)
 
+# set working directory here.
 data1 <- read.csv("data/final_data.csv")
 all_data1 <- data1
 
-# set working directory
-# shinyapps::deployApp(getwd())
+#shinyapps::deployApp(getwd())
 
 shinyServer(function(input, output, session) {
   dat <- reactive({
@@ -116,127 +117,164 @@ shinyServer(function(input, output, session) {
     
     if(input$sort == "Reading Scores"){newdata1 <- newdata1[order(newdata1$PCST_E28),]}
     
+    if(input$sort == "Letter"){newdata1 <- newdata1[order(newdata1$letter,-newdata1$MEALS,newdata1$PCST_E28),]}
+    
     newdata1
     
   })
   
   output$value <- renderPrint({ input$checkGroup })
   
+  groupInput2 <- reactive({
+    y<- groupInput()
+    names(y) <- c("Name", "Meals", "Reading Score", "Letter")
+    y
+  })
   
   output$groupInput <- renderTable({
-    groupInput()
-  })
+    y<- groupInput()
+    names(y) <- c("Name", "Meals", "Reading Score", "Letter")
+    y
+  },include.rownames=FALSE)
   
-  ## Interactive Map ###########################################
   
-  # Create the map
-  map <- createLeafletMap(session, "map")
+  output$downloadData <- downloadHandler(
+    filename = 'list.csv',
+    content = function(file) {
+      write.csv(groupInput2(), file,row.names=FALSE)
+    }
+  )
   
+#   ## Interactive Map ###########################################
+#   
+#   # Create the map
+#   map <- createLeafletMap(session, "map")
+#   outputOptions(output, "map")#, suspendWhenHidden=FALSE)
+#   
+# 
+#   zipsInBounds <- reactive({
+#     if (is.null(input$map_bounds))
+#       return(data1[FALSE,])
+#     bounds <- input$map_bounds
+#     latRng <- range(bounds$north, bounds$south)
+#     lngRng <- range(bounds$east, bounds$west)
+#     
+#     group3 <- c()
+#     if("A" %in% input$checkGroup){group3 <- c(group3,"A")}
+#     if("B" %in% input$checkGroup){group3 <- c(group3,"B")}
+#     if("C" %in% input$checkGroup){group3 <- c(group3,"C")}
+#     if("D" %in% input$checkGroup){group3 <- c(group3,"D")}
+#     if("E" %in% input$checkGroup){group3 <- c(group3,"E")}
+#     if("F" %in% input$checkGroup){group3 <- c(group3,"F")}
+#     if("G" %in% input$checkGroup){group3 <- c(group3,"G")}
+#     if("H" %in% input$checkGroup){group3 <- c(group3,"H")}
+#     if("I" %in% input$checkGroup){group3 <- c(group3,"I")}
+#     if("J" %in% input$checkGroup){group3 <- c(group3,"J")}
+#     if("K" %in% input$checkGroup){group3 <- c(group3,"K")}
+#     if("L" %in% input$checkGroup){group3 <- c(group3,"L")}
+#     if("M" %in% input$checkGroup){group3 <- c(group3,"M")}
+#     if("N" %in% input$checkGroup){group3 <- c(group3,"N")}
+#     if("O" %in% input$checkGroup){group3 <- c(group3,"O")}
+#     if("P" %in% input$checkGroup){group3 <- c(group3,"P")}
+#     
+#     subset(data1,
+#            LAT >= latRng[1] & LAT <= latRng[2] &
+#              LONG >= lngRng[1] & LONG <= lngRng[2])
+#     
+#   })
+  
+#   session$onFlushed(once=TRUE, function() {
+#     paintObs <- observe({
+#       #colorData <- all_data1[["letter"]]
+#       #colors <- brewer.pal(16, "Spectral")[colorData]
+#       #colors <- colors[match(locdata()$SNAME, all_data1$SNAME)]
+#       
+#       map$clearShapes()
+#       map$addCircle(locdata()$LAT,locdata()$LONG,100)#,
+#        #             options = list(color = colors))
+#     })
+#     
+#     session$onSessionEnded(paintObs$suspend)
+#   })
+  
+#   # Show a popup at the given location
+#   showZipcodePopup <- function(id, lat, lng) {
+#     selectedZip <- locdata()[locdata()$LAT == lat & locdata()$LONG == lng,]
+#     content <- as.character(tagList(
+#       tags$h5("Letter:", as.character(selectedZip$letter)),
+#       tags$strong(HTML(sprintf("%s",
+#                                selectedZip$SNAME
+#       ))), tags$br(),
+#       sprintf("Reading Score: %s", as.numeric(selectedZip$PCST_E28)), tags$br(),
+#       sprintf("Percent of students eligible for reduced lunch: %s%%", as.integer(selectedZip$MEALS)), tags$br(),
+#       sprintf("Number of enrolled students: %s", selectedZip$ENROLL)
+#     ))
+#     map$showPopup(lat, lng,content)
+#   }
+  
+#   # When map is clicked, show a popup with city info
+#   clickObs <- observe({
+#     map$clearPopups()
+#     event <- input$map_shape_click
+#     if (is.null(event))
+#       return()
+#     
+#     isolate({
+#       showZipcodePopup(event$id, event$lat, event$lng)
+#     })
+#   })
+#   
+#   session$onSessionEnded(clickObs$suspend)
+  
+locdata <- reactive({
+  group3 <- c()
+  if("A" %in% input$checkGroup){group3 <- c(group3,"A")}
+  if("B" %in% input$checkGroup){group3 <- c(group3,"B")}
+  if("C" %in% input$checkGroup){group3 <- c(group3,"C")}
+  if("D" %in% input$checkGroup){group3 <- c(group3,"D")}
+  if("E" %in% input$checkGroup){group3 <- c(group3,"E")}
+  if("F" %in% input$checkGroup){group3 <- c(group3,"F")}
+  if("G" %in% input$checkGroup){group3 <- c(group3,"G")}
+  if("H" %in% input$checkGroup){group3 <- c(group3,"H")}
+  if("I" %in% input$checkGroup){group3 <- c(group3,"I")}
+  if("J" %in% input$checkGroup){group3 <- c(group3,"J")}
+  if("K" %in% input$checkGroup){group3 <- c(group3,"K")}
+  if("L" %in% input$checkGroup){group3 <- c(group3,"L")}
+  if("M" %in% input$checkGroup){group3 <- c(group3,"M")}
+  if("N" %in% input$checkGroup){group3 <- c(group3,"N")}
+  if("O" %in% input$checkGroup){group3 <- c(group3,"O")}
+  if("P" %in% input$checkGroup){group3 <- c(group3,"P")}
+  subset(data1, letter %in% group3)
+  m <- all_data1 %>% filter(letter %in% group3)
+  m
+})
 
-  zipsInBounds <- reactive({
-    if (is.null(input$map_bounds))
-      return(data1[FALSE,])
-    bounds <- input$map_bounds
-    latRng <- range(bounds$north, bounds$south)
-    lngRng <- range(bounds$east, bounds$west)
-    
-    group3 <- c()
-    if("A" %in% input$checkGroup){group3 <- c(group3,"A")}
-    if("B" %in% input$checkGroup){group3 <- c(group3,"B")}
-    if("C" %in% input$checkGroup){group3 <- c(group3,"C")}
-    if("D" %in% input$checkGroup){group3 <- c(group3,"D")}
-    if("E" %in% input$checkGroup){group3 <- c(group3,"E")}
-    if("F" %in% input$checkGroup){group3 <- c(group3,"F")}
-    if("G" %in% input$checkGroup){group3 <- c(group3,"G")}
-    if("H" %in% input$checkGroup){group3 <- c(group3,"H")}
-    if("I" %in% input$checkGroup){group3 <- c(group3,"I")}
-    if("J" %in% input$checkGroup){group3 <- c(group3,"J")}
-    if("K" %in% input$checkGroup){group3 <- c(group3,"K")}
-    if("L" %in% input$checkGroup){group3 <- c(group3,"L")}
-    if("M" %in% input$checkGroup){group3 <- c(group3,"M")}
-    if("N" %in% input$checkGroup){group3 <- c(group3,"N")}
-    if("O" %in% input$checkGroup){group3 <- c(group3,"O")}
-    if("P" %in% input$checkGroup){group3 <- c(group3,"P")}
-    
-    
-    
-    
-    
-    
-    subset(data1,
-           LAT >= latRng[1] & LAT <= latRng[2] &
-             LONG >= lngRng[1] & LONG <= lngRng[2])
-    
-  })
+
+
   
-  locdata <- reactive({
-    group3 <- c()
-    if("A" %in% input$checkGroup){group3 <- c(group3,"A")}
-    if("B" %in% input$checkGroup){group3 <- c(group3,"B")}
-    if("C" %in% input$checkGroup){group3 <- c(group3,"C")}
-    if("D" %in% input$checkGroup){group3 <- c(group3,"D")}
-    if("E" %in% input$checkGroup){group3 <- c(group3,"E")}
-    if("F" %in% input$checkGroup){group3 <- c(group3,"F")}
-    if("G" %in% input$checkGroup){group3 <- c(group3,"G")}
-    if("H" %in% input$checkGroup){group3 <- c(group3,"H")}
-    if("I" %in% input$checkGroup){group3 <- c(group3,"I")}
-    if("J" %in% input$checkGroup){group3 <- c(group3,"J")}
-    if("K" %in% input$checkGroup){group3 <- c(group3,"K")}
-    if("L" %in% input$checkGroup){group3 <- c(group3,"L")}
-    if("M" %in% input$checkGroup){group3 <- c(group3,"M")}
-    if("N" %in% input$checkGroup){group3 <- c(group3,"N")}
-    if("O" %in% input$checkGroup){group3 <- c(group3,"O")}
-    if("P" %in% input$checkGroup){group3 <- c(group3,"P")}
-    subset(data1, letter %in% group3)
-    m <- all_data1 %>% filter(letter %in% group3)
-    m
-  })
-  
-  session$onFlushed(once=TRUE, function() {
-    paintObs <- observe({
-      #colorData <- all_data1[["letter"]]
-      #colors <- brewer.pal(16, "Spectral")[colorData]
-      #colors <- colors[match(locdata()$SNAME, all_data1$SNAME)]
-      
-      map$clearShapes()
-      map$addCircle(locdata()$LAT,locdata()$LONG,100)#,
-       #             options = list(color = colors))
-    })
+  output$myChart2 <- renderMap({
     
-    session$onSessionEnded(paintObs$suspend)
-  })
-  
-  # Show a popup at the given location
-  showZipcodePopup <- function(id, lat, lng) {
-    selectedZip <- locdata()[locdata()$LAT == lat & locdata()$LONG == lng,]
-    content <- as.character(tagList(
-      tags$h5("Letter:", as.character(selectedZip$letter)),
-      tags$strong(HTML(sprintf("%s",
-                               selectedZip$SNAME
-      ))), tags$br(),
-      sprintf("Reading Score: %s", as.numeric(selectedZip$PCST_E28)), tags$br(),
-      sprintf("Percent of students eligible for reduced lunch: %s%%", as.integer(selectedZip$MEALS)), tags$br(),
-      sprintf("Number of enrolled students: %s", selectedZip$ENROLL)
-    ))
-    map$showPopup(lat, lng,content)
-  }
-  
-  # When map is clicked, show a popup with city info
-  clickObs <- observe({
-    map$clearPopups()
-    event <- input$map_shape_click
-    if (is.null(event))
-      return()
+    df <- data.frame(locdata())
+    map <- Leaflet$new()
+    map$params$width="100%"
+    map$params$urlTemplate="//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png"
+    map$params$layerOpts$attribution = HTML('Maps by <a href="http://www.mapbox.com/">Mapbox</a>')
+    map$html_assets$js = "gomap.js"
+    map$html_assets$css = "styles.css"
+    map$setView(c(34.052363, -118.399373), 10)
+    #map$tileLayer(provider = 'Stamen.TonerLite')
+    for (i in 1:nrow(df)) {
+      map$marker(c(df[i, "LAT"], df[i, "LONG"]), 
+                 bindPopup = (paste0("<b> Letter: ", df[i,"letter"],
+                                     "<br>",df[i,"SNAME"],
+                                     "</b><br>Reading Score: ",df[i,"PCST_E28"],
+                                     "<br>Percent of students eligible for reduced lunch: ",df[i,"MEALS"],"%",
+                                     "<br>Number of enrolled students: ",df[i,"ENROLL"])
+                 )                 
+              )
+    }
     
-    isolate({
-      showZipcodePopup(event$id, event$lat, event$lng)
-    })
-  })
-  
-  session$onSessionEnded(clickObs$suspend)
-  
-  
-  
-  
-  
+    map
+  })  
+    
 })
