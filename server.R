@@ -15,7 +15,7 @@ data1 <- read.csv("data/final_data.csv")
 all_data1 <- data1
 
 #library(rsconnect)
-#deployApp()
+#deployApp("C:/Users/Brian/Dropbox/Projects/reading_is_fundamental")
 
 shinyServer(function(input, output, session) {
   dat <- reactive({
